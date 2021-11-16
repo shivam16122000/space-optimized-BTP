@@ -2,7 +2,7 @@
 using namespace std;
 
 #define V_C 30.0
-#define R_O 0.0001
+#define R_O 0.000075
 #define PI 3.14
 #define A_RADIUS 0.9975
 #define PARTICLE_DENSITY 1000.0
@@ -94,8 +94,8 @@ vector<double> generateRandomPosition(){
 double getRadius(double A,double Ro){
     double eta = generateRandomNumber(-1.0,1.0)*((rand()%10)/10.0);
     double r = Ro*(1+(A*eta));
-    return r;
-    // return Ro;
+    //return r;
+     return Ro;
 }
 
 double getMass(double r,double particleDensity,double pi){
@@ -202,7 +202,7 @@ vector<double> getNewPosition(vector<double> &prevPosition,double timeStep,vecto
 
 // main program
 int main(){
-       int noOfParticles = 50;
+       int noOfParticles = 1;
        vector<double>particles_Radius(noOfParticles);
        vector<double>particles_Mass(noOfParticles);
        vector<vector<double>>particles_Curr_Velocity(noOfParticles);
@@ -217,18 +217,27 @@ int main(){
        for(int i=0;i<noOfParticles;i++){
            particles_Radius[i] = getRadius(A_RADIUS,R_O);
            particles_Mass[i] = getMass(particles_Radius[i],PARTICLE_DENSITY,PI);
-           particles_Curr_Velocity[i] = getRandomInitialVelocityVectorInConeParameter(Nc,Ac,V_C); 
-           particles_Curr_Position[i] = generateRandomPosition();
+        //    particles_Curr_Velocity[i] = getRandomInitialVelocityVectorInConeParameter(Nc,Ac,V_C); 
+        //    particles_Curr_Position[i] = generateRandomPosition();
+           particles_Curr_Velocity[i] = {0.0,30.0,0.0}; 
+           particles_Curr_Position[i] = {0.0,0.0,2.0};
            particles_Curr_DragForce[i] = getDragForce(AIR_DENSITY,PI,Vf,particles_Curr_Velocity[i],particles_Radius[i]);
            particles_GravForce[i] = getGravForce(particles_Mass[i],GRAV_CONSTANT);
        }
        // { CODE FOR PRINTING DATA IN XYZ FILE };
-       ofstream MyFile("simulation.xyz");
-       MyFile <<noOfParticles<<endl;
-       MyFile<<"current time is "<<0<<" sec"<<endl;
-       for(int k=0;k<noOfParticles;k++){
-           MyFile<<(k+1)<<" "<<particles_Curr_Position[k][0]<<" "<<particles_Curr_Position[k][1]<<" "<<particles_Curr_Position[k][2]<<" "<<particles_Curr_Velocity[k][0]<<" "<<particles_Curr_Velocity[k][1]<<" "<<particles_Curr_Velocity[k][2]<<endl;
-       }
+    //    ofstream MyFile("simulation2.xyz");
+    //    MyFile <<noOfParticles<<endl;
+    //    MyFile<<"current time is "<<0<<" sec"<<endl;
+    //    for(int k=0;k<noOfParticles;k++){
+    //        MyFile<<(k+1)<<" "<<particles_Curr_Position[k][0]<<" "<<particles_Curr_Position[k][1]<<" "<<particles_Curr_Position[k][2]<<" "<<particles_Curr_Velocity[k][0]<<" "<<particles_Curr_Velocity[k][1]<<" "<<particles_Curr_Velocity[k][2]<<endl;
+    //    }
+       //PRINT OVER
+       ofstream MyFileTrajectoryZ("trajectoryZ.xyz");
+       ofstream MyFileTrajectoryY("trajectoryY.xyz");
+       MyFileTrajectoryZ<<"["<<endl;
+       MyFileTrajectoryZ<<particles_Curr_Position[0][2]<<","<<endl;
+       MyFileTrajectoryY<<"["<<endl;
+       MyFileTrajectoryY<<particles_Curr_Position[0][1]<<","<<endl;
 
        for(int i=1;i<4000000;i++){
            for(int j=0;j<noOfParticles;j++){
@@ -241,18 +250,24 @@ int main(){
                }
                particles_Curr_DragForce[j] = getDragForce(AIR_DENSITY,PI,Vf,particles_Curr_Velocity[j],particles_Radius[j]);   
            }
+
            // { CODE FOR PRINTING DATA IN XYZ FILE };
-           if(i%1000==0){
-                MyFile <<noOfParticles<<endl;
-                MyFile<<"current time is "<<i*0.000001<<" sec"<<endl;
-                for(int k=0;k<noOfParticles;k++){
-                    MyFile<<(k+1)<<" "<<particles_Curr_Position[k][0]<<" "<<particles_Curr_Position[k][1]<<" "<<particles_Curr_Position[k][2]<<" "<<particles_Curr_Velocity[k][0]<<" "<<particles_Curr_Velocity[k][1]<<" "<<particles_Curr_Velocity[k][2]<<endl;
-                }
+           if(i%10000==0){
+               MyFileTrajectoryZ<<particles_Curr_Position[0][2]<<","<<endl;
+               MyFileTrajectoryY<<particles_Curr_Position[0][1]<<","<<endl;
+                // MyFile <<noOfParticles<<endl;
+                // MyFile<<"current time is "<<i*0.000001<<" sec"<<endl;
+                // for(int k=0;k<noOfParticles;k++){
+                //     MyFile<<(k+1)<<" "<<particles_Curr_Position[k][0]<<" "<<particles_Curr_Position[k][1]<<" "<<particles_Curr_Position[k][2]<<" "<<particles_Curr_Velocity[k][0]<<" "<<particles_Curr_Velocity[k][1]<<" "<<particles_Curr_Velocity[k][2]<<endl;
+                // }
            }
-
+           // PRINT OVER
        }
-
-       MyFile.close();
+        MyFileTrajectoryZ<<"]"<<endl;
+        MyFileTrajectoryY<<"]"<<endl;
+        MyFileTrajectoryZ.close();
+        MyFileTrajectoryY.close();
+      // MyFile.close();
 
     return 0;
 }
